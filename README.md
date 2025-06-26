@@ -41,8 +41,8 @@ Follow these steps to set up and run the project locally:
 - Clone the repository:
 
 ```Bash
-git clone https://github.com/<>.git
-cd <>
+git clone https://github.com/black-operative/DefBlog.git
+cd DefBlog
 ```
 
 - Install dependencies:
