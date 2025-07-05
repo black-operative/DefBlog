@@ -3,7 +3,6 @@ import Footer       from './Footer/Footer'
 import Header       from './Header/Header'
 import LogoutButton from './Header/LogoutButton'
 import PostForm     from './Post-Form/PostForm';
-import AuthLayout   from './AuthLayout';
 import Button       from './Button'
 import Input        from './Input';
 import Login        from './Login';
@@ -28,7 +27,6 @@ export {
     PostForm,
     Container,
     Protected,
-    AuthLayout,
     LogoutButton,
 }
 

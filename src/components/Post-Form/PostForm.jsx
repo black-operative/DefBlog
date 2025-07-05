@@ -28,43 +28,62 @@ function PostForm( { post } ) {
     
     const navigate = useNavigate();
     const userData = useSelector(state => state.auth?.userData);
+    const [error, setError] = useState("");
 
     const submit = async (data) => {
-        // Update Post data
-        if (post) {
-            // Upload new image and delete old if provided
-            const file = data.image[0] ? await fileService.uploadFile(data.image[0]) : null;
-            if (file) fileService.deleteFile(post.featured_image);
-            
-            // Update post in backend
-            const updatedPost = postService.updatePost(
-                post.$id,
-                {
-                    ...data,
-                    featured_image : file ? file.$id : undefined
-                }
-            );
+        setError("");
+        try {
+            if (!userData) {
+                setError("You must be logged in to create or update a post.");
+                return;
+            }
+            // Update Post data
+            if (post) {
+                // Upload new image and delete old if provided
+                const file = data.image[0] ? await fileService.uploadFile(data.image[0]) : null;
+                if (file) fileService.deleteFile(post.featured_image);
+                
+                // Update post in backend
+                const updatedPost = await postService.updatePost(
+                    post.$id,
+                    {
+                        ...data,
+                        featured_image : file ? file.$id : undefined
+                    }
+                );
+    
+                if (updatedPost) navigate(`/post/${updatedPost.$id}`);
+                else setError("Failed to update post. Please try again.");
+            // New Post data
+            } else {
+                let fileId = null;
 
-            if (updatedPost) navigate(`/post/${updatedPost.$id}`);
-        
-        // New Post data
-        } else {
-            const file = data.image[0] ? await fileService.uploadFile(data.image[0]) : null;
-            
-            if (file) {
-                const fileId = file.$id
-                data.featured_image = fileId;
+                if (data.image[0]) {
+                    const file = await fileService.uploadFile(data.image[0]);
+                    if (!file) {
+                        setError("Failed to upload image. Please try again.");
+                        return;
+                    }
+                    fileId = file.$id;
+                }
 
                 const newPost = await postService.createPost(
                     {
                         ...data,
+                        featured_image : fileId,
                         user_id : userData.$id
                     }
                 );
                 
                 if (newPost) navigate(`/post/${newPost.$id}`);
+                else setError("Failed to create post. Please try again.");
             }
+        } catch (error) {
+            console.log("PostForm.jsx :: submit :: error", error);
+            setError("Failed to submit post. Please try again.");
+            return;
         }
+        
     }
 
     const slugTransform = useCallback(
@@ -104,6 +123,14 @@ function PostForm( { post } ) {
             onSubmit  = { handleSubmit(submit) } 
             className = "flex flex-wrap"
         >
+            {
+                error && (
+                    <div className="w-full mb-4 p-2 bg-red-100 text-red-700 rounded">
+                        {error}
+                    </div>
+                )
+            }
+
             <div className = "w-2/3 px-2">
 
                 <Input
